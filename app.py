@@ -2,9 +2,16 @@ import streamlit as st
 import pandas as pd
 import pickle
 import re
-#streamlit run /Users/zkrv/Documents/VSC/maybefinallysomeimprovement/app.py
+from whitelist import *
+
 with open('maybefinallysomeimprovement/model.pkl', 'rb') as f:
     model = pickle.load(f)
+
+def is_whitelisted(url):
+    for domain in WHITELIST:
+        if domain in url:
+            return True
+    return False
 
 def extract_features(url):
     features = {}
@@ -33,16 +40,19 @@ st.write("Введите ссылку ниже, чтобы проверить е
 user_input = st.text_input("URL адрес:", "https://example.com")
 
 if st.button("Проверить"):
-    
-    data = extract_features(user_input)
-    
-    # Делаем предсказание
-    prediction = model.predict(data)[0]
-    probability = model.predict_proba(data) 
-    
-    if prediction == 1:
-        st.error(f"⚠️ Подозрительно! Скорее всего, это фишинг. (Вероятность: {probability[0][1]:.2%})")
+    if is_whitelisted(user_input):
+        result = "✅ Безопасно (данный сайт находиться в белом списке)"
+        st.success(result)
     else:
-        st.success(f"✅ Безопасно. Модель считает эту ссылку нормальной. (Вероятность: {probability[0][0]:.2%})")
+       data = extract_features(user_input)
+    
+  
+       prediction = model.predict(data)[0]
+       probability = model.predict_proba(data) 
+    
+       if prediction == 1:
+           st.error(f"⚠️ Подозрительно! Скорее всего, это фишинг. (Вероятность: {probability[0][1]:.2%})")
+       else:
+           st.success(f"✅ Безопасно. Модель считает эту ссылку нормальной. (Вероятность: {probability[0][0]:.2%})")
 
 st.info("Модель обучена на 1.2 млн ссылок с точностью ~90%, что не исключает ошибок у модели, проверяйте дополнительно информацию")
