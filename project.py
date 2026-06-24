@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 
 
-df = glob.glob('maybefinallysomeimprovement/archive/urls_*.csv')
+df = glob.glob('archive/urls_*.csv')
 
 df_list = [pd.read_csv(f) for f in df]
 
